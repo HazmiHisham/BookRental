@@ -11,6 +11,7 @@ import Profile from '../screens/Profile';
 import Onboarding from '../screens/Onboarding';
 import BottomTabBar from '../components/BottomTabBar';
 import AddBookModal from '../components/AddBookModal';
+import Wallet from '../screens/Wallet';
 
 const Stack = createNativeStackNavigator();
 
@@ -69,6 +70,17 @@ export default function Navigation() {
             <Stack.Screen name="Dashboard" options={{ headerShown: false }}>
               {(props) => <OwnerDashboard {...props} onAddBook={handleAddBook} />}
             </Stack.Screen>
+          </Stack.Navigator>
+        )}
+
+        {/* Wallet Tab */}
+        {activeTab === 'wallet' && (
+          <Stack.Navigator>
+            <Stack.Screen
+              name="Wallet"
+              component={Wallet}
+              options={{ headerShown: false }}
+            />
           </Stack.Navigator>
         )}
 

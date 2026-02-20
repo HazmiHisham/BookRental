@@ -6,6 +6,7 @@ export default function BottomTabBar({ activeTab, onTabChange, userRole }) {
     ? [
         { id: 'home', label: 'Browse', icon: 'home-outline' },
         { id: 'dashboard', label: 'Dashboard', icon: 'grid-outline' },
+        { id: 'wallet', label: 'Wallet', icon: 'wallet-outline' },
         { id: 'rentals', label: 'Rentals', icon: 'book-outline' },
         { id: 'profile', label: 'Profile', icon: 'person-outline' },
       ]
