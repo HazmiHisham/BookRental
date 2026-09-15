@@ -1,0 +1,214 @@
+---
+description: Book rental app business logic and patterns
+alwaysApply: true
+---
+
+# BookRentNew App Standards
+
+## Project Overview
+This is a React Native Expo app for a book rental system with two user roles:
+- **Readers**: Browse and rent books
+- **Owners**: List books for rent and manage inventory
+
+## Data Models
+
+### Book Object Structure
+```javascript
+{
+  id: string,
+  title: string,
+  author: string,
+  cover: string (URL),
+  price: number (rental price per month),
+  description: string,
+  stock: number,
+  owner: {
+    id: string,
+    name: string,
+    avatar: string
+  },
+  format: string ('Paperback', 'Hardcover', 'eBook'),
+  category: string
+}
+```
+
+### Rental Object Structure
+```javascript
+{
+  id: string,
+  bookId: string,
+  book: Book,
+  userId: string,
+  duration: number (months),
+  rentalPrice: number,
+  deliveryMethod: 'postage' | 'cod' | 'pickup',
+  deliveryFee: number,
+  deposit: number,
+  status: 'active' | 'returned' | 'overdue',
+  startDate: Date,
+  endDate: Date
+}
+```
+
+## User Roles and Permissions
+
+### Reader Role
+- Browse available books
+- View book details
+- Rent books with different delivery methods
+- View rental history
+- Manage profile and wallet
+
+### Owner Role
+- Add new books to inventory
+- Update book details and stock
+- View rental statistics
+- Manage listed books
+- Track revenue
+
+## Business Rules
+
+### Rental Process
+1. User selects a book
+2. Chooses rental duration (1-12 months)
+3. Selects delivery method:
+   - **Postage**: RM7 fee
+   - **COD**: RM0 fee
+   - **Store Pickup**: RM0 fee
+4. Calculates total: `rentalPrice × duration + deliveryFee + deposit`
+5. Payment confirmation
+6. Book stock decreases by 1
+
+### Security Deposit
+- Deposit = Rental cost (price × duration)
+- Fully refundable upon return in good condition
+- Partial refund if book has minor damage
+- No refund if book is lost or severely damaged
+
+### Minimum Order
+- Minimum rental order: RM10
+- If multiple books: must use same delivery method
+- Delivery method is locked after first book is added to cart
+
+### Stock Management
+- Stock levels must be tracked
+- Show different messages based on stock:
+  - Stock > 5: "In stock and ready to rent"
+  - 1-5 stock: "Limited availability - rent now!"
+  - 0 stock: "Out of stock - Check back later"
+
+## Common Patterns
+
+### Loading States
+Always show loading indicators:
+
+```javascript
+if (loading) {
+  return (
+    <View style={styles.centered}>
+      <ActivityIndicator size="large" color="#007AFF" />
+    </View>
+  );
+}
+```
+
+### Empty States
+Handle empty data gracefully:
+
+```javascript
+if (books.length === 0) {
+  return (
+    <View style={styles.empty}>
+      <Text>No books available</Text>
+      <Button title="Refresh" onPress={handleRefresh} />
+    </View>
+  );
+}
+```
+
+### Modals
+Use modals for rental confirmation, adding books, etc.:
+
+```javascript
+<Modal
+  visible={visible}
+  animationType="slide"
+  transparent={true}
+  onRequestClose={onClose}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      {/* Modal content */}
+    </View>
+  </View>
+</Modal>
+```
+
+### Currency Formatting
+Always format currency consistently:
+
+```javascript
+// ✅ GOOD
+const formatCurrency = (amount) => `RM${amount.toFixed(2)}`;
+<Text>{formatCurrency(book.price)}</Text>
+
+// ❌ BAD
+<Text>RM{book.price}</Text>
+```
+
+## Navigation Flow
+
+### Reader Flow
+1. Onboarding → Select "Reader" role
+2. HomeScreen → Browse books
+3. BookDetails → View book info
+4. RentModal → Confirm rental
+5. Cart → Review and checkout
+6. MyRentals → View active rentals
+
+### Owner Flow
+1. Onboarding → Select "Owner" role
+2. OwnerDashboard → Manage books
+3. AddBookModal → List new book
+4. Profile → View statistics
+
+## UI/UX Guidelines
+
+### Colors
+- Primary: #007AFF (Blue)
+- Success: #34C759 (Green)
+- Warning: #FF9500 (Orange)
+- Error: #FF3B30 (Red)
+- Background: #F2F2F7 (Light Gray)
+- Text: #000000 (Black) / #8E8E93 (Gray)
+
+### Spacing
+- Small: 8px
+- Medium: 16px
+- Large: 24px
+- Extra Large: 32px
+
+### Typography
+- Heading: 24px, bold
+- Subheading: 18px, semibold
+- Body: 16px, regular
+- Caption: 14px, regular
+
+### Touch Targets
+- Minimum size: 44x44 points
+- Use TouchableOpacity for feedback
+- Provide haptic feedback for important actions
+
+## Testing Checklist
+
+Before committing changes, verify:
+- [ ] App runs on iOS and Android
+- [ ] No console errors or warnings
+- [ ] Proper error handling for API calls
+- [ ] Loading states work correctly
+- [ ] Navigation flows are smooth
+- [ ] Images load with fallbacks
+- [ ] Forms validate input
+- [ ] Currency displays correctly
+- [ ] Stock levels update properly
+- [ ] User roles are respected

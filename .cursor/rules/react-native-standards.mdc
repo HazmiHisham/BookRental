@@ -1,0 +1,297 @@
+---
+description: React Native and Expo coding standards for BookRentNew app
+globs: "**/*.{js,jsx}"
+alwaysApply: false
+---
+
+# React Native Standards for BookRentNew
+
+## Component Structure
+
+### Functional Components
+Always use functional components with hooks:
+
+```javascript
+// ✅ GOOD
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function BookCard({ book, onPress }) {
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{book.title}</Text>
+    </View>
+  );
+}
+
+// ❌ BAD - Avoid class components
+class BookCard extends React.Component {
+  render() {
+    return <View>...</View>;
+  }
+}
+```
+
+### PropTypes and Defaults
+Always validate props:
+
+```javascript
+// ✅ GOOD
+export default function RentModal({ book, visible = false, onClose }) {
+  if (!book) return null;
+  // ... component code
+}
+
+// ❌ BAD - No prop validation
+export default function RentModal(props) {
+  return <View>{props.book.title}</View>;
+}
+```
+
+## State Management
+
+### Local State with useState
+For component-level state:
+
+```javascript
+// ✅ GOOD
+const [books, setBooks] = useState([]);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+// Update state immutably
+setBooks([...books, newBook]);
+
+// ❌ BAD - Mutating state
+books.push(newBook);
+setBooks(books);
+```
+
+### Side Effects with useEffect
+Handle side effects properly:
+
+```javascript
+// ✅ GOOD
+useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      const data = await getBooks();
+      setBooks(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  fetchBooks();
+}, []);
+
+// ❌ BAD - Missing cleanup or dependencies
+useEffect(() => {
+  fetchBooks();
+});
+```
+
+## Navigation
+
+### React Navigation Patterns
+Use consistent navigation patterns:
+
+```javascript
+// ✅ GOOD
+const handleBookPress = (book) => {
+  navigation.navigate('BookDetails', { 
+    bookId: book.id,
+    book: book 
+  });
+};
+
+// Access params in destination screen
+const { bookId, book } = route.params;
+
+// ❌ BAD - Passing too much data
+navigation.navigate('BookDetails', { 
+  entireDatabase: database 
+});
+```
+
+## Styling
+
+### StyleSheet API
+Always use StyleSheet.create():
+
+```javascript
+// ✅ GOOD
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#ffffff',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+});
+
+// ❌ BAD - Inline styles for everything
+<View style={{ padding: 10, margin: 5, flex: 1 }}>
+```
+
+### Responsive Design
+Use Dimensions or percentage-based sizing:
+
+```javascript
+// ✅ GOOD
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  card: {
+    width: width * 0.9,
+    height: height * 0.3,
+  },
+});
+
+// ❌ BAD - Fixed pixel values
+const styles = StyleSheet.create({
+  card: {
+    width: 350,
+    height: 200,
+  },
+});
+```
+
+## Error Handling
+
+### Try-Catch Blocks
+Always handle errors gracefully:
+
+```javascript
+// ✅ GOOD
+const handleRentBook = async (bookId) => {
+  try {
+    setLoading(true);
+    await rentBook(bookId);
+    Alert.alert('Success', 'Book rented successfully!');
+    navigation.goBack();
+  } catch (error) {
+    Alert.alert('Error', error.message || 'Failed to rent book');
+    console.error('Rent book error:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ❌ BAD - No error handling
+const handleRentBook = async (bookId) => {
+  await rentBook(bookId);
+  navigation.goBack();
+};
+```
+
+## Performance
+
+### Optimize Re-renders
+Use React.memo and useCallback:
+
+```javascript
+// ✅ GOOD
+import { memo, useCallback } from 'react';
+
+const BookCard = memo(({ book, onPress }) => {
+  const handlePress = useCallback(() => {
+    onPress(book.id);
+  }, [book.id, onPress]);
+  
+  return (
+    <TouchableOpacity onPress={handlePress}>
+      <Text>{book.title}</Text>
+    </TouchableOpacity>
+  );
+});
+
+// ❌ BAD - Re-creates function on every render
+const BookCard = ({ book, onPress }) => {
+  return (
+    <TouchableOpacity onPress={() => onPress(book.id)}>
+      <Text>{book.title}</Text>
+    </TouchableOpacity>
+  );
+};
+```
+
+### FlatList for Long Lists
+Always use FlatList or SectionList for lists:
+
+```javascript
+// ✅ GOOD
+<FlatList
+  data={books}
+  renderItem={({ item }) => <BookCard book={item} />}
+  keyExtractor={(item) => item.id.toString()}
+  initialNumToRender={10}
+  maxToRenderPerBatch={10}
+  windowSize={5}
+/>
+
+// ❌ BAD - Mapping arrays in ScrollView
+<ScrollView>
+  {books.map(book => <BookCard key={book.id} book={book} />)}
+</ScrollView>
+```
+
+## Code Organization
+
+### File Structure
+- **Screens**: Full-page components in `/src/screens/`
+- **Components**: Reusable UI components in `/src/components/`
+- **Navigation**: Navigation setup in `/src/navigation/`
+- **Utils**: Helper functions and constants
+
+### Naming Conventions
+- Components: PascalCase (e.g., `BookCard.js`)
+- Functions: camelCase (e.g., `handleBookPress`)
+- Constants: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
+- Files: Match component name (e.g., `BookCard.js` for BookCard component)
+
+## Expo Specific
+
+### Asset Management
+Use Expo's asset system:
+
+```javascript
+// ✅ GOOD
+import { Image } from 'react-native';
+<Image 
+  source={require('./assets/book-placeholder.png')} 
+  style={styles.image}
+/>
+
+// For remote images, add caching
+<Image 
+  source={{ uri: book.coverUrl, cache: 'force-cache' }}
+  defaultSource={require('./assets/book-placeholder.png')}
+/>
+```
+
+### Safe Area
+Always handle safe areas:
+
+```javascript
+// ✅ GOOD
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function HomeScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Content */}
+    </SafeAreaView>
+  );
+}
+```
