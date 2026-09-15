@@ -1,2 +1,0 @@
-# BookRental
-Rental Book
