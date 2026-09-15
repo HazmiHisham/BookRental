@@ -1,0 +1,552 @@
+---
+description: Complete project specification and tech stack for BookRentNew
+alwaysApply: true
+---
+
+# BookRentNew - Project Specification
+
+## Project Overview
+
+**Project Name:** BookRentNew  
+**Version:** 1.0.0  
+**Type:** Mobile Application (iOS, Android, Web)  
+**Domain:** Book Rental Platform  
+**Bundle ID:** com.fareez123.BookRentNew
+
+### Purpose
+A peer-to-peer book rental platform connecting book owners with readers. Owners can list their books for rent, and readers can browse and rent books with flexible delivery options.
+
+---
+
+## Tech Stack
+
+### Frontend Framework
+- **React Native** v0.81.5
+- **React** v19.1.0
+- **React DOM** v19.1.0 (for web support)
+- **React Native Web** v0.21.0
+
+### Development Platform
+- **Expo SDK** v54.0.33
+- **Expo Go** for mobile testing
+- **Metro Bundler** for JavaScript bundling
+- **Expo New Architecture** enabled
+
+### Navigation
+- **React Navigation** v7.1.28
+  - Native Stack Navigator v7.12.0
+- **React Native Screens** v4.16.0
+- **React Native Safe Area Context** v5.6.0
+
+### UI/UX
+- **Expo Status Bar** v3.0.9
+- Custom components (no UI library)
+- Native styling with StyleSheet API
+
+### Platform Support
+- ✅ **iOS** (iPhone, iPad)
+- ✅ **Android** (Phone, Tablet with edge-to-edge)
+- ✅ **Web** (via React Native Web)
+
+### Build & Development Tools
+- **Node.js** (Latest LTS recommended)
+- **npm** package manager
+- **Expo CLI** for development and builds
+
+---
+
+## Project Structure
+
+```
+bookshare-app/
+├── .cursor/
+│   └── rules/                      # Cursor AI rules
+│       ├── react-native-standards.mdc
+│       ├── bookrent-app-standards.mdc
+│       └── PROJECT-SPEC.mdc
+├── assets/                         # App assets
+│   ├── icon.png                    # App icon
+│   ├── splash-icon.png            # Splash screen
+│   ├── adaptive-icon.png          # Android adaptive icon
+│   └── favicon.png                # Web favicon
+├── src/
+│   ├── components/                # Reusable UI components
+│   │   ├── AddBookModal.js       # Owner book listing modal
+│   │   ├── BookCard.js           # Book display card
+│   │   ├── BottomTabBar.js       # Custom tab navigation
+│   │   └── RentModal.js          # Book rental modal
+│   ├── screens/                  # Full-page screens
+│   │   ├── HomeScreen.js         # Main book browsing
+│   │   ├── BookDetails.js        # Detailed book view
+│   │   ├── MyRentals.js         # User rental history
+│   │   ├── OwnerDashboard.js    # Owner book management
+│   │   ├── Profile.js           # User profile
+│   │   ├── Wallet.js            # Payment management
+│   │   └── Onboarding.js        # Initial role selection
+│   └── navigation/
+│       └── Navigation.js         # Navigation configuration
+├── App.js                         # Root component
+├── index.js                       # App entry point
+├── app.json                       # Expo configuration
+├── package.json                   # Dependencies
+└── README.md                      # Project documentation
+```
+
+---
+
+## Architecture
+
+### Design Pattern
+- **Component-Based Architecture**
+- **Functional Components** with React Hooks
+- **Screen-Component Pattern** (Screens compose Components)
+- **Container/Presentational** separation where needed
+
+### State Management
+- **Local State:** React useState hooks
+- **Side Effects:** React useEffect hooks
+- **No Global State Library:** Simple prop drilling and context where needed
+
+### Navigation Architecture
+- **Stack Navigation** for main flows
+- **Tab Navigation** for bottom navigation
+- **Modal Navigation** for overlays (rent, add book)
+
+### Data Flow
+1. **User Input** → Component Handler
+2. **API Call** (when backend is ready)
+3. **Local State Update**
+4. **UI Re-render**
+
+---
+
+## Application Features
+
+### User Roles
+
+#### Reader Role
+- Browse available books
+- Search and filter books by category
+- View detailed book information
+- Rent books with flexible duration (1-12 months)
+- Select delivery method (Postage, COD, Store Pickup)
+- View rental history and active rentals
+- Manage wallet and payments
+- Rate and review books
+
+#### Owner Role
+- List books for rent
+- Set rental price and availability
+- Manage book inventory and stock
+- Track rental statistics
+- View revenue and earnings
+- Update book details and prices
+- Handle book returns and conditions
+
+### Core Features
+
+#### Book Management
+- Add/Edit/Delete books (Owner)
+- Stock level tracking
+- Multiple book formats (Paperback, Hardcover, eBook)
+- Category-based organization
+- Image upload for book covers
+
+#### Rental System
+- Flexible rental duration (1-12 months)
+- Multiple delivery options:
+  - **Postage/Courier:** RM7 fee
+  - **Cash on Delivery (COD):** RM0 fee
+  - **Store Pickup:** RM0 fee
+- Security deposit system (equals rental cost)
+- Rental price calculation per month
+- Minimum order requirement (RM10)
+- Cart system with locked delivery method
+
+#### Payment System
+- Wallet integration
+- Payment confirmation modal
+- Security deposit handling
+- Refund management
+- Transaction history
+
+---
+
+## Business Logic
+
+### Pricing Model
+```javascript
+Total Cost = (Rental Price × Duration) + Delivery Fee + Security Deposit
+
+Where:
+- Rental Price: Per month cost set by owner
+- Duration: Number of months (1-12)
+- Delivery Fee: RM7 (Postage) | RM0 (COD/Pickup)
+- Security Deposit: Rental Price × Duration (fully refundable)
+```
+
+### Stock Management
+- Stock decreases by 1 when book is rented
+- Stock increases by 1 when book is returned
+- Visual indicators:
+  - **High Stock (>5):** Green - "In stock and ready to rent"
+  - **Low Stock (1-5):** Orange - "Limited availability - rent now!"
+  - **Out of Stock (0):** Red - "Out of stock - Check back later"
+
+### Rental Rules
+- Minimum order: RM10
+- All books in cart must use same delivery method
+- Delivery method locked after first item added
+- Security deposit equals total rental cost
+- Full refund on good condition return
+- Partial refund on minor damage
+- No refund on loss or severe damage
+
+---
+
+## UI/UX Design System
+
+### Color Palette
+```javascript
+const Colors = {
+  // Primary
+  primary: '#007AFF',        // iOS Blue
+  primaryDark: '#0051D5',
+  primaryLight: '#4DA3FF',
+  
+  // Status
+  success: '#34C759',        // Green
+  warning: '#FF9500',        // Orange
+  error: '#FF3B30',         // Red
+  info: '#5AC8FA',          // Light Blue
+  
+  // Neutral
+  background: '#F2F2F7',     // Light Gray
+  surface: '#FFFFFF',        // White
+  text: '#000000',          // Black
+  textSecondary: '#8E8E93', // Gray
+  border: '#C6C6C8',        // Light Gray
+  
+  // Role Colors
+  reader: '#007AFF',         // Blue
+  owner: '#FF9500',         // Orange
+};
+```
+
+### Typography Scale
+```javascript
+const Typography = {
+  // Headings
+  h1: { fontSize: 28, fontWeight: 'bold' },
+  h2: { fontSize: 24, fontWeight: 'bold' },
+  h3: { fontSize: 20, fontWeight: '600' },
+  h4: { fontSize: 18, fontWeight: '600' },
+  
+  // Body
+  body: { fontSize: 16, fontWeight: 'normal' },
+  bodySmall: { fontSize: 14, fontWeight: 'normal' },
+  
+  // Special
+  caption: { fontSize: 12, fontWeight: 'normal' },
+  button: { fontSize: 16, fontWeight: '600' },
+};
+```
+
+### Spacing System
+```javascript
+const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
+```
+
+### Layout Guidelines
+- Minimum touch target: 44x44 points
+- Screen padding: 16px (md)
+- Component spacing: 8px (sm) to 16px (md)
+- Card border radius: 12px
+- Modal border radius: 24px
+
+---
+
+## Development Setup
+
+### Prerequisites
+```bash
+# Required
+- Node.js v18+ (LTS recommended)
+- npm v9+
+- Expo CLI
+
+# For mobile development
+- Expo Go app (iOS/Android)
+- Xcode (for iOS development)
+- Android Studio (for Android development)
+```
+
+### Installation
+```bash
+# Install dependencies
+cd bookshare-app
+npm install
+
+# Start development server
+npm start
+
+# Or start with web
+npm run web
+
+# For Android
+npm run android
+
+# For iOS
+npm run ios
+```
+
+### Development Server
+- **Port:** 8081 (default)
+- **Metro Bundler:** Runs automatically
+- **Hot Reload:** Enabled
+- **Fast Refresh:** Enabled
+
+### Environment Variables
+Currently none required. Future backend integration will need:
+- API_BASE_URL
+- API_KEY
+- STRIPE_KEY (for payments)
+
+---
+
+## Data Models
+
+### Book Model
+```javascript
+{
+  id: string,                    // Unique identifier
+  title: string,                 // Book title
+  author: string,                // Author name
+  cover: string,                 // Image URL
+  price: number,                 // Rental price per month (RM)
+  description: string,           // Book description
+  stock: number,                 // Available quantity
+  category: string,              // Genre/category
+  format: 'Paperback' | 'Hardcover' | 'eBook',
+  owner: {
+    id: string,
+    name: string,
+    avatar: string,
+    rating: number
+  },
+  rating: number,                // Average rating (1-5)
+  totalReviews: number,
+  isAvailable: boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Rental Model
+```javascript
+{
+  id: string,
+  bookId: string,
+  book: Book,
+  userId: string,
+  ownerId: string,
+  duration: number,              // Months (1-12)
+  rentalPrice: number,           // Price per month
+  deliveryMethod: 'postage' | 'cod' | 'pickup',
+  deliveryFee: number,
+  deposit: number,               // Security deposit
+  totalCost: number,
+  status: 'pending' | 'active' | 'returned' | 'overdue' | 'cancelled',
+  startDate: Date,
+  endDate: Date,
+  returnDate?: Date,
+  condition: 'good' | 'minor_damage' | 'major_damage' | 'lost',
+  refundAmount: number,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### User Model
+```javascript
+{
+  id: string,
+  name: string,
+  email: string,
+  avatar?: string,
+  role: 'reader' | 'owner' | 'both',
+  phone: string,
+  address?: string,
+  wallet: {
+    balance: number,
+    transactions: Transaction[]
+  },
+  rentals: Rental[],             // As reader
+  listings: Book[],              // As owner
+  rating: number,
+  totalRentals: number,
+  joinedAt: Date
+}
+```
+
+---
+
+## API Integration (Future)
+
+### Backend Requirements
+Currently the app runs with mock data. Future backend integration needs:
+
+#### Endpoints Required
+```javascript
+// Authentication
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/logout
+GET    /api/auth/me
+
+// Books
+GET    /api/books
+GET    /api/books/:id
+POST   /api/books              // Owner only
+PUT    /api/books/:id          // Owner only
+DELETE /api/books/:id          // Owner only
+GET    /api/books/search?q=
+
+// Rentals
+POST   /api/rentals            // Create rental
+GET    /api/rentals            // User's rentals
+GET    /api/rentals/:id
+PUT    /api/rentals/:id/return
+PUT    /api/rentals/:id/cancel
+
+// Payments
+POST   /api/payments/charge
+POST   /api/payments/refund
+GET    /api/wallet/balance
+GET    /api/wallet/transactions
+
+// Users
+GET    /api/users/:id
+PUT    /api/users/:id
+GET    /api/users/:id/ratings
+```
+
+#### Authentication
+- JWT-based authentication
+- Secure token storage (AsyncStorage)
+- Automatic token refresh
+- Role-based access control
+
+---
+
+## Testing Strategy
+
+### Manual Testing Checklist
+- [ ] App launches successfully on iOS
+- [ ] App launches successfully on Android
+- [ ] App runs on web browser
+- [ ] Navigation flows work correctly
+- [ ] All modals open and close properly
+- [ ] Forms validate input correctly
+- [ ] Images load with fallback handling
+- [ ] Error states display properly
+- [ ] Loading states work correctly
+- [ ] Currency displays in correct format (RM)
+
+### Future Automated Testing
+- Unit tests with Jest
+- Component tests with React Testing Library
+- E2E tests with Detox (mobile)
+- Snapshot testing for UI consistency
+
+---
+
+## Deployment
+
+### Expo Build
+```bash
+# Build for iOS
+eas build --platform ios
+
+# Build for Android
+eas build --platform android
+
+# Build for all platforms
+eas build --platform all
+```
+
+### App Stores
+- **iOS:** Apple App Store via TestFlight
+- **Android:** Google Play Store via internal testing
+- **Web:** Static hosting (Vercel, Netlify)
+
+### Environment-Specific Builds
+- **Development:** Local Expo Go testing
+- **Staging:** TestFlight / Internal Testing
+- **Production:** App Store / Play Store release
+
+---
+
+## Known Limitations
+
+### Current State
+- No backend integration (mock data only)
+- No real payment processing
+- No push notifications
+- No real-time updates
+- No offline support
+- No user authentication
+
+### Future Enhancements
+- Backend API integration
+- Payment gateway (Stripe/PayPal)
+- Push notifications for rental reminders
+- Real-time chat between readers and owners
+- Offline mode with local caching
+- Social features (reviews, ratings, sharing)
+- Wishlist and favorites
+- Advanced search and filters
+- Book recommendations
+- Multi-language support
+
+---
+
+## Version History
+
+### v1.0.0 (Current)
+- Initial release
+- Core rental functionality
+- Reader and Owner roles
+- Cart and checkout flow
+- Mock data implementation
+- iOS, Android, Web support
+
+---
+
+## Contact & Support
+
+**Developer:** Fareez  
+**Project Location:** `C:\Hazmi File\Fource Tech\Book Rental System\bookshare-app`  
+**Git Repository:** TBD  
+
+---
+
+## Important Notes
+
+1. **Always** use functional components with hooks
+2. **Never** mutate state directly
+3. **Always** handle errors with try-catch
+4. **Always** show loading states
+5. **Always** format currency as RM (Malaysian Ringgit)
+6. **Always** validate user input
+7. **Always** use StyleSheet.create() for styles
+8. **Never** use inline styles for static styling
+9. **Always** use FlatList for long lists
+10. **Always** optimize images and assets
